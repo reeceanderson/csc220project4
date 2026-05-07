@@ -51,6 +51,51 @@ class Player extends Actor {
   }
 
   /**
+   *      Method: public draw()
+   *  Parameters: void
+   *      Return: void
+   * Description: Draws the player as a blue circle with a
+   *              white triangle indicating facing direction,
+   *              and calls the superclass draw method for
+   *              the health bar
+   */
+
+  public void draw() {
+    super.draw();
+    float size = min((float) width / 12, (float) height / 12);
+    float cx = size / 2;
+    float cy = size / 2;
+    float radius = size * 0.35;
+
+    // Player body (blue circle)
+    noStroke();
+    fill(59, 130, 246);
+    ellipse(cx, cy, radius * 2, radius * 2);
+
+    // Facing direction indicator (white triangle)
+    fill(255);
+    float triSize = size * 0.15;
+
+    switch (this.facing) {
+    case NORTH:
+      triangle(cx, cy - radius - triSize, cx - triSize, cy - radius + triSize * 0.5, cx + triSize, cy - radius + triSize * 0.5);
+      break;
+
+    case SOUTH:
+      triangle(cx, cy + radius + triSize, cx - triSize, cy + radius - triSize * 0.5, cx + triSize, cy + radius - triSize * 0.5);
+      break;
+
+    case EAST:
+      triangle(cx + radius + triSize, cy, cx + radius - triSize * 0.5, cy - triSize, cx + radius - triSize * 0.5, cy + triSize);
+      break;
+
+    case WEST:
+      triangle(cx - radius - triSize, cy, cx - radius + triSize * 0.5, cy - triSize, cx - radius + triSize * 0.5, cy + triSize);
+      break;
+    }
+  }
+
+  /**
    *      Method: public getAction()
    *  Parameters: void
    *      Return: Action - The selected action to perform

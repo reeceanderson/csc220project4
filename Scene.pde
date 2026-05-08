@@ -23,6 +23,7 @@ class Scene {
   private LinkedList<Actor> enemies;
   private HashMap<WorldObject, Position> positions;
   private HashMap<Direction, Position> doors;
+  private int roomsCleared;
 
   /**
    * Constructor: public Scene()
@@ -38,6 +39,7 @@ class Scene {
     this.enemies = new LinkedList<Actor>();
     this.positions = new HashMap<WorldObject, Position>();
     this.doors = new HashMap<Direction, Position>();
+    this.roomsCleared = 0;
     this.player = new Player(Direction.NORTH);
     this.reset(Direction.NORTH);
   }
@@ -56,6 +58,7 @@ class Scene {
     this.enemies = new LinkedList<Actor>();
     this.positions = new HashMap<WorldObject, Position>();
     this.doors = new HashMap<Direction, Position>();
+    this.roomsCleared = object.getInt("roomsCleared", 0);
 
     // Load the player
     JSONObject playerObj = object.getJSONObject("player");
@@ -129,6 +132,7 @@ class Scene {
     object.setInt("roomWidth", this.roomWidth);
     object.setInt("roomHeight", this.roomHeight);
     object.setString("entry", this.entry.name());
+    object.setInt("roomsCleared", this.roomsCleared);
 
     // Serialize the player and their position
     object.setJSONObject("player", this.player.serialize());
@@ -184,12 +188,16 @@ class Scene {
 
     // Store entry direction and regenerate room dimensions
     this.entry = entry;
+    this.roomsCleared++;
     this.roomWidth = int(random(7, 11));
     this.roomHeight = int(random(7, 11));
     this.room = new WorldObject[this.roomWidth][this.roomHeight];
     this.enemies.clear();
     this.positions.clear();
     this.doors.clear();
+
+    // Difficulty scaling based on depth
+    float depthScale = 1.0 + (this.roomsCleared - 1) * 0.15;
 
     // Determine the player's starting position based on entry direction
     // Entry is the direction the player was facing when entering,
@@ -262,29 +270,31 @@ class Scene {
       }
     }
 
-    // Randomly place health potions
-    int numPotions = int(random(1, 4));
+    // Randomly place health potions (fewer and weaker in deeper rooms)
+    int numPotions = max(1, int(random(1, 4)) - this.roomsCleared / 5);
 
     for (int i = 0; i < numPotions; i++) {
       int x = int(random(this.roomWidth));
       int y = int(random(this.roomHeight));
 
       if (this.room[x][y] == null) {
-        HealthPotion potion = new HealthPotion(int(random(15, 36)));
+        int healAmt = max(5, int(random(15, 36) / depthScale));
+        HealthPotion potion = new HealthPotion(healAmt);
         this.room[x][y] = potion;
         this.positions.put(potion, new Position(x, y, this));
       }
     }
 
-    // Randomly place spike traps
-    int numTraps = int(random(1, 4));
+    // Randomly place spike traps (more and stronger in deeper rooms)
+    int numTraps = int(random(1, 4)) + this.roomsCleared / 3;
 
     for (int i = 0; i < numTraps; i++) {
       int x = int(random(this.roomWidth));
       int y = int(random(this.roomHeight));
 
       if (this.room[x][y] == null) {
-        SpikeTrap trap = new SpikeTrap(int(random(5, 21)));
+        int trapDmg = int(random(5, 21) * depthScale);
+        SpikeTrap trap = new SpikeTrap(trapDmg);
         this.room[x][y] = trap;
         this.positions.put(trap, new Position(x, y, this));
       }
@@ -302,14 +312,16 @@ class Scene {
     //   }
     // }
 
-    // TODO: Randomly place enemies
-    // int numEnemies = int(random(2, 5));
+    // TODO: Randomly place enemies (more enemies with higher stats in deeper rooms)
+    // int numEnemies = int(random(2, 5)) + this.roomsCleared / 3;
     // for (int i = 0; i < numEnemies; i++) {
     //   int x = int(random(this.roomWidth));
     //   int y = int(random(this.roomHeight));
     //   if (this.room[x][y] == null) {
     //     Direction dir = Direction.values()[int(random(4))];
-    //     YourEnemy enemy = new YourEnemy(health, damage, dir);
+    //     int enemyHealth = int(50 * depthScale);
+    //     int enemyDamage = int(8 * depthScale);
+    //     YourEnemy enemy = new YourEnemy(enemyHealth, enemyDamage, dir);
     //     this.room[x][y] = enemy;
     //     this.enemies.add(enemy);
     //     this.positions.put(enemy, new Position(x, y, this));
@@ -343,11 +355,12 @@ class Scene {
    */
 
   public boolean tryTurn() {
-    // If the player is dead, reset the room
+    // If the player is dead, reset the room and depth counter
     if (this.player == null || this.player.getHealth() == 0) {
       Direction[] directions = Direction.values();
       Direction direction = directions[int(random(directions.length))];
       this.player = new Player(direction);
+      this.roomsCleared = 0;
       this.reset(direction);
     }
 
@@ -387,6 +400,7 @@ class Scene {
           Direction[] directions = Direction.values();
           Direction direction = directions[int(random(directions.length))];
           this.player = new Player(direction);
+          this.roomsCleared = 0;
           this.reset(direction);
           return true;
         }
@@ -542,6 +556,17 @@ class Scene {
   }
 
   /**
+   *      Method: public getRoomsCleared()
+   *  Parameters: void
+   *      Return: int - The number of rooms the player has cleared
+   * Description: Returns the current room depth
+   */
+
+  public int getRoomsCleared() {
+    return roomsCleared;
+  }
+
+  /**
    *      Method: public keyPressed()
    *  Parameters: void
    *      Return: void
@@ -660,5 +685,11 @@ class Scene {
         }
       }
     }
+
+    // Draw depth HUD in the top-left corner
+    fill(255);
+    textAlign(LEFT, TOP);
+    textSize(16);
+    text("Room: " + this.roomsCleared, 10, 10);
   }
 }

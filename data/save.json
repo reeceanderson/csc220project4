@@ -1,45 +1,52 @@
 {
-  "roomWidth": 10,
+  "roomWidth": 9,
   "doors": [
     {
-      "x": 2,
-      "y": 0,
-      "direction": "NORTH"
-    },
-    {
       "x": 0,
-      "y": 3,
+      "y": 4,
       "direction": "WEST"
     },
     {
-      "x": 7,
-      "y": 9,
+      "x": 8,
+      "y": 6,
+      "direction": "EAST"
+    },
+    {
+      "x": 5,
+      "y": 8,
       "direction": "SOUTH"
     }
   ],
-  "entry": "WEST",
-  "playerX": 9,
-  "roomHeight": 10,
+  "entry": "SOUTH",
+  "playerX": 4,
+  "roomHeight": 9,
+  "roomsCleared": 5,
   "objects": [
     {
       "x": 1,
-      "y": 5,
+      "y": 7,
       "className": "SpikeTrap",
-      "damageAmount": 11
+      "damageAmount": 18
     },
     {
-      "healAmount": 22,
-      "x": 2,
-      "y": 0,
+      "healAmount": 9,
+      "x": 3,
+      "y": 8,
       "className": "HealthPotion"
+    },
+    {
+      "x": 8,
+      "y": 5,
+      "className": "SpikeTrap",
+      "damageAmount": 24
     }
   ],
-  "playerY": 5,
+  "playerY": 3,
   "player": {
     "damage": 10,
-    "facing": "WEST",
+    "facing": "SOUTH",
     "maxHealth": 100,
     "className": "Player",
-    "currHealth": 100
+    "currHealth": 0
   }
 }

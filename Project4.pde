@@ -21,7 +21,7 @@ String fileName;
  */
 
 void setup() {
-  fullScreen(P2D);
+  size(1280,720);
   pixelDensity(1);
   fileName = sketchPath("data/save.json");
   File file = new File(fileName);

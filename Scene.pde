@@ -90,23 +90,13 @@ class Scene {
       int oy = obj.getInt("y");
       WorldObject worldObj = null;
 
-      switch (className) {
-      case "Berry":
-        worldObj = new Berry(obj);
-        break;
-
-      case "PoisonSwamp":
-        worldObj = new PoisonSwamp(obj);
-        break;
-
-      // TODO: Add enemy and obstacle cases here
-      // case "YourEnemy":
-      //   worldObj = new YourEnemy(obj);
-      //   break;
-      // case "YourObstacle":
-      //   worldObj = new YourObstacle(obj);
-      //   break;
-      }
+     if (className.equals("Berry")) {
+  worldObj = new Berry(obj);
+} else if (className.equals("PoisonSwamp")) {
+  worldObj = new PoisonSwamp(obj);
+} else if (className.equals("Enemy")) {
+  worldObj = new Enemy(obj);
+}
 
       if (worldObj != null) {
         this.room[ox][oy] = worldObj;
@@ -318,21 +308,22 @@ class Scene {
     //   }
     // }
 
-    // TODO: Randomly place enemies (more enemies with higher stats in deeper rooms)
-    // int numEnemies = int(random(2, 5)) + this.roomsCleared / 3;
-    // for (int i = 0; i < numEnemies; i++) {
-    //   int x = int(random(this.roomWidth));
-    //   int y = int(random(this.roomHeight));
-    //   if (this.room[x][y] == null) {
-    //     Direction dir = Direction.values()[int(random(4))];
-    //     int enemyHealth = int(50 * depthScale);
-    //     int enemyDamage = int(8 * depthScale);
-    //     YourEnemy enemy = new YourEnemy(enemyHealth, enemyDamage, dir);
-    //     this.room[x][y] = enemy;
-    //     this.enemies.add(enemy);
-    //     this.positions.put(enemy, new Position(x, y, this));
-    //   }
-    // }
+    
+   int numEnemies = int(random(2, 5)) + this.roomsCleared / 3;
+for (int i = 0; i < numEnemies; i++) {
+  int x = int(random(this.roomWidth));
+  int y = int(random(this.roomHeight));
+  if (this.room[x][y] == null) {
+    Direction dir = Direction.values()[int(random(4))];
+    CreatureType type = CreatureType.values()[int(random(CreatureType.values().length))];
+    int enemyHealth = int(50 * depthScale);
+    int enemyDamage = int(8 * depthScale);
+    Enemy enemy = new Enemy(enemyHealth, enemyDamage, dir, type);
+    this.room[x][y] = enemy;
+    this.enemies.add(enemy);
+    this.positions.put(enemy, new Position(x, y, this));
+  }
+}
 
     this.updateActions(this.player);
   }

@@ -1,78 +1,98 @@
 {
-  "roomWidth": 8,
+  "roomWidth": 9,
   "doors": [
     {
-      "x": 7,
-      "y": 5,
+      "x": 8,
+      "y": 6,
       "direction": "EAST"
     },
     {
-      "x": 0,
-      "y": 5,
-      "direction": "WEST"
+      "x": 7,
+      "y": 0,
+      "direction": "NORTH"
+    },
+    {
+      "x": 3,
+      "y": 7,
+      "direction": "SOUTH"
+    }
+  ],
+  "entry": "EAST",
+  "playerX": 4,
+  "roomHeight": 8,
+  "roomsCleared": 2,
+  "objects": [
+    {
+      "x": 2,
+      "y": 3,
+      "className": "PoisonSwamp",
+      "damageAmount": 20
     },
     {
       "x": 3,
       "y": 0,
-      "direction": "NORTH"
-    }
-  ],
-  "entry": "NORTH",
-  "playerX": 4,
-  "roomHeight": 7,
-  "roomsCleared": 12,
-  "objects": [
+      "className": "PoisonSwamp",
+      "damageAmount": 7
+    },
     {
-      "healAmount": 11,
-      "x": 0,
-      "y": 1,
+      "healAmount": 29,
+      "x": 3,
+      "y": 6,
       "className": "Berry"
     },
     {
-      "x": 0,
-      "y": 3,
-      "className": "PoisonSwamp",
-      "damageAmount": 43
-    },
-    {
-      "x": 1,
-      "y": 6,
-      "className": "PoisonSwamp",
-      "damageAmount": 33
-    },
-    {
-      "x": 2,
-      "y": 5,
-      "className": "PoisonSwamp",
-      "damageAmount": 16
-    },
-    {
-      "x": 6,
+      "damage": 9,
+      "pokemonId": 102,
+      "x": 4,
+      "facing": "SOUTH",
       "y": 1,
-      "className": "PoisonSwamp",
-      "damageAmount": 31
+      "maxHealth": 57,
+      "creatureType": "GRASS",
+      "className": "Enemy",
+      "currHealth": 57
     },
     {
-      "x": 7,
-      "y": 1,
-      "className": "PoisonSwamp",
-      "damageAmount": 26
-    },
-    {
-      "x": 7,
+      "damage": 9,
+      "pokemonId": 140,
+      "x": 4,
+      "facing": "NORTH",
       "y": 6,
-      "className": "PoisonSwamp",
-      "damageAmount": 55
+      "maxHealth": 57,
+      "creatureType": "WATER",
+      "className": "Enemy",
+      "currHealth": 57
+    },
+    {
+      "damage": 9,
+      "pokemonId": 6,
+      "x": 8,
+      "facing": "NORTH",
+      "y": 0,
+      "maxHealth": 57,
+      "creatureType": "FIRE",
+      "className": "Enemy",
+      "currHealth": 57
+    },
+    {
+      "damage": 9,
+      "pokemonId": 146,
+      "x": 8,
+      "facing": "EAST",
+      "y": 2,
+      "maxHealth": 57,
+      "creatureType": "FIRE",
+      "className": "Enemy",
+      "currHealth": 57
     }
   ],
-  "playerY": 6,
+  "playerY": 5,
   "player": {
-    "damage": 23,
-    "evolutionStage": 3,
-    "facing": "NORTH",
-    "maxHealth": 225,
+    "damage": 10,
+    "evolutionStage": 1,
+    "facing": "SOUTH",
+    "maxHealth": 100,
     "creatureType": "FIRE",
     "className": "Player",
-    "currHealth": 225
+    "currHealth": 39
   }
 }

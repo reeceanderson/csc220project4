@@ -1,5 +1,5 @@
 /**
- *      Author: Prof. Morales, Reece Anderson
+ *      Author: Prof. Morales
  *      Course: CPSC 220
  *  Instructor: Prof. Morales
  *     Created: 2026-04-15
@@ -13,22 +13,25 @@ abstract class Actor extends WorldObject {
   private int maxHealth;
   private int currHealth;
   private int damage;
+  private CreatureType creatureType;
   protected Direction facing;
   protected HashMap<Action, Boolean> validActions;
 
   /**
    * Constructor: public Actor()
-   *  Parameters: int       health - The health value of the actor
-   *              int       damage - The damage value of the actor
-   *              Direction facing - The direction the actor is facing
+   *  Parameters: int          health - The health value of the actor
+   *              int          damage - The damage value of the actor
+   *              Direction    facing - The direction the actor is facing
+   *              CreatureType type   - The creature type of the actor
    * Description: Constructs an actor
    */
 
-  public Actor(int health, int damage, Direction facing) {
+  public Actor(int health, int damage, Direction facing, CreatureType type) {
     this.maxHealth = health;
     this.currHealth = health;
     this.damage = damage;
     this.facing = facing;
+    this.creatureType = type;
     this.validActions = new HashMap<Action, Boolean>();
   }
 
@@ -43,6 +46,7 @@ abstract class Actor extends WorldObject {
     this.currHealth = object.getInt("currHealth");
     this.damage = object.getInt("damage");
     this.facing = Direction.valueOf(object.getString("facing"));
+    this.creatureType = CreatureType.valueOf(object.getString("creatureType", "NORMAL"));
     this.validActions = new HashMap<Action, Boolean>();
   }
 
@@ -59,6 +63,7 @@ abstract class Actor extends WorldObject {
     object.setInt("currHealth", this.currHealth);
     object.setInt("damage", this.damage);
     object.setString("facing", this.facing.name());
+    object.setString("creatureType", this.creatureType.name());
     return object;
   }
 
@@ -86,6 +91,30 @@ abstract class Actor extends WorldObject {
   }
 
   /**
+   *      Method: public getCreatureType()
+   *  Parameters: void
+   *      Return: CreatureType - The creature type of the actor
+   * Description: Returns the creature type of the actor
+   */
+
+  public CreatureType getCreatureType() {
+    return this.creatureType;
+  }
+
+  /**
+   *      Method: public getDamageAgainst()
+   *  Parameters: Actor target - The actor being attacked
+   *      Return: int - The effective damage after type multiplier
+   * Description: Calculates damage dealt to a target actor
+   *              using the type effectiveness chart
+   */
+
+  public int getDamageAgainst(Actor target) {
+    float multiplier = this.creatureType.getMultiplier(target.getCreatureType());
+    return (int) (this.damage * multiplier);
+  }
+
+  /**
    *      Method: public updateHealth()
    *  Parameters: int change - The amount of health to update
    *                           by, clamped between 0 and the
@@ -96,6 +125,21 @@ abstract class Actor extends WorldObject {
 
   public void updateHealth(int change) {
     this.currHealth = constrain(this.currHealth + change, 0, this.maxHealth);
+  }
+
+  /**
+   *      Method: protected boostStats()
+   *  Parameters: int healthBoost  - Amount to increase max health
+   *              int damageBoost  - Amount to increase damage
+   *      Return: void
+   * Description: Permanently increases the actor's max health
+   *              and damage, also fully healing the actor
+   */
+
+  protected void boostStats(int healthBoost, int damageBoost) {
+    this.maxHealth += healthBoost;
+    this.currHealth = this.maxHealth;
+    this.damage += damageBoost;
   }
 
   /**

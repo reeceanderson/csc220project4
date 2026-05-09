@@ -12,6 +12,7 @@
 class Player extends Actor {
   private char nextKey;
   private HashMap<Character, Boolean> debounce;
+  private int evolutionStage;
 
   /**
    * Constructor: public Player()
@@ -20,9 +21,10 @@ class Player extends Actor {
    */
 
   public Player(Direction direction) {
-    super(100, 10, direction);
+    super(100, 10, direction, CreatureType.FIRE);
     this.nextKey = '\0';
     this.debounce = new HashMap<Character, Boolean>();
+    this.evolutionStage = 1;
   }
 
   /**
@@ -35,6 +37,7 @@ class Player extends Actor {
     super(object);
     this.nextKey = '\0';
     this.debounce = new HashMap<Character, Boolean>();
+    this.evolutionStage = object.getInt("evolutionStage", 1);
   }
 
   /**
@@ -47,17 +50,56 @@ class Player extends Actor {
   public JSONObject serialize() {
     JSONObject object = super.serialize();
     object.setString("className", "Player");
+    object.setInt("evolutionStage", this.evolutionStage);
     return object;
+  }
+
+  /**
+   *      Method: public getEvolutionStage()
+   *  Parameters: void
+   *      Return: int - The current evolution stage (1, 2, or 3)
+   * Description: Returns the player's evolution stage
+   */
+
+  public int getEvolutionStage() {
+    return this.evolutionStage;
+  }
+
+  /**
+   *      Method: public tryEvolve()
+   *  Parameters: int floor - The current floor number
+   *      Return: boolean - Whether the player evolved
+   * Description: Checks if the player should evolve based
+   *              on the floor number. Stage 2 at floor 5,
+   *              stage 3 at floor 10. Boosts stats and
+   *              fully heals the player on evolution.
+   */
+
+  public boolean tryEvolve(int floor) {
+    if (this.evolutionStage == 1 && floor >= 5) {
+      this.evolutionStage = 2;
+      this.boostStats(50, 5);
+      return true;
+    }
+
+    if (this.evolutionStage == 2 && floor >= 10) {
+      this.evolutionStage = 3;
+      this.boostStats(75, 8);
+      return true;
+    }
+
+    return false;
   }
 
   /**
    *      Method: public draw()
    *  Parameters: void
    *      Return: void
-   * Description: Draws the player as a blue circle with a
-   *              white triangle indicating facing direction,
-   *              and calls the superclass draw method for
-   *              the health bar
+   * Description: Draws the player creature based on its
+   *              evolution stage. Stage 1 is a small fire
+   *              creature, stage 2 adds horns and is larger,
+   *              stage 3 adds wings and is the largest.
+   *              A flame tail indicates facing direction.
    */
 
   public void draw() {
@@ -65,32 +107,202 @@ class Player extends Actor {
     float size = min((float) width / 12, (float) height / 12);
     float cx = size / 2;
     float cy = size / 2;
-    float radius = size * 0.35;
 
-    // Player body (blue circle)
+    switch (this.evolutionStage) {
+    case 1:
+      this.drawStage1(size, cx, cy);
+      break;
+
+    case 2:
+      this.drawStage2(size, cx, cy);
+      break;
+
+    case 3:
+      this.drawStage3(size, cx, cy);
+      break;
+    }
+
+    // Draw flame tail for facing direction (all stages)
+    this.drawFlame(size, cx, cy);
+  }
+
+  /**
+   *      Method: private drawStage1()
+   *  Parameters: float size - The tile size
+   *              float cx   - The center X of the tile
+   *              float cy   - The center Y of the tile
+   *      Return: void
+   * Description: Draws the stage 1 creature, a small
+   *              red creature with a tan belly and eyes
+   */
+
+  private void drawStage1(float size, float cx, float cy) {
+    float r = size * 0.28;
     noStroke();
-    fill(59, 130, 246);
-    ellipse(cx, cy, radius * 2, radius * 2);
 
-    // Facing direction indicator (white triangle)
+    // Body
+    fill(239, 68, 68);
+    ellipse(cx, cy, r * 2.2, r * 2.0);
+
+    // Belly
+    fill(251, 191, 146);
+    ellipse(cx, cy + r * 0.15, r * 1.2, r * 1.1);
+
+    // Eyes
+    this.drawEyes(cx, cy, r);
+  }
+
+  /**
+   *      Method: private drawStage2()
+   *  Parameters: float size - The tile size
+   *              float cx   - The center X of the tile
+   *              float cy   - The center Y of the tile
+   *      Return: void
+   * Description: Draws the stage 2 creature, larger and
+   *              darker red with two horns on top
+   */
+
+  private void drawStage2(float size, float cx, float cy) {
+    float r = size * 0.33;
+    noStroke();
+
+    // Horns
+    fill(200, 50, 50);
+    triangle(cx - r * 0.5, cy - r * 0.7, cx - r * 0.3, cy - r * 1.4, cx - r * 0.1, cy - r * 0.7);
+    triangle(cx + r * 0.5, cy - r * 0.7, cx + r * 0.3, cy - r * 1.4, cx + r * 0.1, cy - r * 0.7);
+
+    // Body (darker red, bigger)
+    fill(220, 50, 50);
+    ellipse(cx, cy, r * 2.3, r * 2.1);
+
+    // Belly
+    fill(251, 180, 130);
+    ellipse(cx, cy + r * 0.12, r * 1.3, r * 1.1);
+
+    // Eyes (slightly more angular)
+    this.drawEyes(cx, cy, r);
+
+    // Brow ridges
+    stroke(180, 30, 30);
+    strokeWeight(2);
+    line(cx - r * 0.5, cy - r * 0.4, cx - r * 0.15, cy - r * 0.3);
+    line(cx + r * 0.5, cy - r * 0.4, cx + r * 0.15, cy - r * 0.3);
+    noStroke();
+  }
+
+  /**
+   *      Method: private drawStage3()
+   *  Parameters: float size - The tile size
+   *              float cx   - The center X of the tile
+   *              float cy   - The center Y of the tile
+   *      Return: void
+   * Description: Draws the stage 3 creature, the largest
+   *              form with a deep crimson body, sharp horns,
+   *              and small wings on the sides
+   */
+
+  private void drawStage3(float size, float cx, float cy) {
+    float r = size * 0.36;
+    noStroke();
+
+    // Wings (behind body)
+    fill(180, 30, 30, 200);
+    // Left wing
+    triangle(cx - r * 0.8, cy - r * 0.2, cx - r * 1.6, cy - r * 0.8, cx - r * 0.8, cy + r * 0.4);
+    // Right wing
+    triangle(cx + r * 0.8, cy - r * 0.2, cx + r * 1.6, cy - r * 0.8, cx + r * 0.8, cy + r * 0.4);
+
+    // Wing inner membrane
+    fill(239, 68, 68, 150);
+    triangle(cx - r * 0.8, cy - r * 0.1, cx - r * 1.3, cy - r * 0.5, cx - r * 0.8, cy + r * 0.3);
+    triangle(cx + r * 0.8, cy - r * 0.1, cx + r * 1.3, cy - r * 0.5, cx + r * 0.8, cy + r * 0.3);
+
+    // Horns (larger, sharper)
+    fill(160, 30, 30);
+    triangle(cx - r * 0.45, cy - r * 0.65, cx - r * 0.25, cy - r * 1.5, cx - r * 0.05, cy - r * 0.65);
+    triangle(cx + r * 0.45, cy - r * 0.65, cx + r * 0.25, cy - r * 1.5, cx + r * 0.05, cy - r * 0.65);
+
+    // Body (deep crimson, largest)
+    fill(190, 30, 30);
+    ellipse(cx, cy, r * 2.3, r * 2.2);
+
+    // Belly (slightly more orange)
+    fill(240, 160, 100);
+    ellipse(cx, cy + r * 0.1, r * 1.3, r * 1.15);
+
+    // Chest mark (V shape)
+    stroke(255, 200, 80);
+    strokeWeight(2);
+    line(cx - r * 0.3, cy - r * 0.15, cx, cy + r * 0.15);
+    line(cx + r * 0.3, cy - r * 0.15, cx, cy + r * 0.15);
+    noStroke();
+
+    // Eyes (more intense)
+    this.drawEyes(cx, cy, r);
+  }
+
+  /**
+   *      Method: private drawEyes()
+   *  Parameters: float cx - The center X of the creature
+   *              float cy - The center Y of the creature
+   *              float r  - The body radius
+   *      Return: void
+   * Description: Draws the creature's eyes with white
+   *              sclera and dark pupils
+   */
+
+  private void drawEyes(float cx, float cy, float r) {
+    float eyeOffX = r * 0.35;
+    float eyeY = cy - r * 0.2;
+    noStroke();
     fill(255);
-    float triSize = size * 0.15;
+    ellipse(cx - eyeOffX, eyeY, r * 0.5, r * 0.55);
+    ellipse(cx + eyeOffX, eyeY, r * 0.5, r * 0.55);
+    fill(20);
+    ellipse(cx - eyeOffX, eyeY, r * 0.22, r * 0.28);
+    ellipse(cx + eyeOffX, eyeY, r * 0.22, r * 0.28);
+  }
+
+  /**
+   *      Method: private drawFlame()
+   *  Parameters: float size - The tile size
+   *              float cx   - The center X of the tile
+   *              float cy   - The center Y of the tile
+   *      Return: void
+   * Description: Draws a flame in the facing direction as
+   *              a direction indicator, scaled by stage
+   */
+
+  private void drawFlame(float size, float cx, float cy) {
+    float r = size * (0.28 + (this.evolutionStage - 1) * 0.04);
+    float flameLen = size * (0.18 + (this.evolutionStage - 1) * 0.04);
+
+    noStroke();
+    fill(251, 146, 60);
 
     switch (this.facing) {
     case NORTH:
-      triangle(cx, cy - radius - triSize, cx - triSize, cy - radius + triSize * 0.5, cx + triSize, cy - radius + triSize * 0.5);
+      triangle(cx, cy - r - flameLen * 1.4, cx - flameLen * 0.5, cy - r + flameLen * 0.2, cx + flameLen * 0.5, cy - r + flameLen * 0.2);
+      fill(255, 220, 80);
+      triangle(cx, cy - r - flameLen * 0.8, cx - flameLen * 0.25, cy - r + flameLen * 0.1, cx + flameLen * 0.25, cy - r + flameLen * 0.1);
       break;
 
     case SOUTH:
-      triangle(cx, cy + radius + triSize, cx - triSize, cy + radius - triSize * 0.5, cx + triSize, cy + radius - triSize * 0.5);
+      triangle(cx, cy + r + flameLen * 1.4, cx - flameLen * 0.5, cy + r - flameLen * 0.2, cx + flameLen * 0.5, cy + r - flameLen * 0.2);
+      fill(255, 220, 80);
+      triangle(cx, cy + r + flameLen * 0.8, cx - flameLen * 0.25, cy + r - flameLen * 0.1, cx + flameLen * 0.25, cy + r - flameLen * 0.1);
       break;
 
     case EAST:
-      triangle(cx + radius + triSize, cy, cx + radius - triSize * 0.5, cy - triSize, cx + radius - triSize * 0.5, cy + triSize);
+      triangle(cx + r + flameLen * 1.4, cy, cx + r - flameLen * 0.2, cy - flameLen * 0.5, cx + r - flameLen * 0.2, cy + flameLen * 0.5);
+      fill(255, 220, 80);
+      triangle(cx + r + flameLen * 0.8, cy, cx + r - flameLen * 0.1, cy - flameLen * 0.25, cx + r - flameLen * 0.1, cy + flameLen * 0.25);
       break;
 
     case WEST:
-      triangle(cx - radius - triSize, cy, cx - radius + triSize * 0.5, cy - triSize, cx - radius + triSize * 0.5, cy + triSize);
+      triangle(cx - r - flameLen * 1.4, cy, cx - r + flameLen * 0.2, cy - flameLen * 0.5, cx - r + flameLen * 0.2, cy + flameLen * 0.5);
+      fill(255, 220, 80);
+      triangle(cx - r - flameLen * 0.8, cy, cx - r + flameLen * 0.1, cy - flameLen * 0.25, cx - r + flameLen * 0.1, cy + flameLen * 0.25);
       break;
     }
   }

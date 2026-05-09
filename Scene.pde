@@ -24,6 +24,7 @@ class Scene {
   private HashMap<WorldObject, Position> positions;
   private HashMap<Direction, Position> doors;
   private int roomsCleared;
+  private boolean dead;
 
   /**
    * Constructor: public Scene()
@@ -40,6 +41,7 @@ class Scene {
     this.positions = new HashMap<WorldObject, Position>();
     this.doors = new HashMap<Direction, Position>();
     this.roomsCleared = 0;
+    this.dead = false;
     this.player = new Player(Direction.NORTH);
     this.reset(Direction.NORTH);
   }
@@ -59,6 +61,7 @@ class Scene {
     this.positions = new HashMap<WorldObject, Position>();
     this.doors = new HashMap<Direction, Position>();
     this.roomsCleared = object.getInt("roomsCleared", 0);
+    this.dead = false;
 
     // Load the player
     JSONObject playerObj = object.getJSONObject("player");
@@ -88,12 +91,12 @@ class Scene {
       WorldObject worldObj = null;
 
       switch (className) {
-      case "HealthPotion":
-        worldObj = new HealthPotion(obj);
+      case "Berry":
+        worldObj = new Berry(obj);
         break;
 
-      case "SpikeTrap":
-        worldObj = new SpikeTrap(obj);
+      case "PoisonSwamp":
+        worldObj = new PoisonSwamp(obj);
         break;
 
       // TODO: Add enemy and obstacle cases here
@@ -199,6 +202,9 @@ class Scene {
     // Difficulty scaling based on depth
     float depthScale = 1.0 + (this.roomsCleared - 1) * 0.15;
 
+    // Check if the player should evolve
+    this.player.tryEvolve(this.roomsCleared);
+
     // Determine the player's starting position based on entry direction
     // Entry is the direction the player was facing when entering,
     // so they come through the opposite wall (entry.inverse() side)
@@ -270,33 +276,33 @@ class Scene {
       }
     }
 
-    // Randomly place health potions (fewer and weaker in deeper rooms)
-    int numPotions = max(1, int(random(1, 4)) - this.roomsCleared / 5);
+    // Randomly place berries (fewer and weaker in deeper floors)
+    int numBerries = max(1, int(random(1, 4)) - this.roomsCleared / 5);
 
-    for (int i = 0; i < numPotions; i++) {
+    for (int i = 0; i < numBerries; i++) {
       int x = int(random(this.roomWidth));
       int y = int(random(this.roomHeight));
 
       if (this.room[x][y] == null) {
         int healAmt = max(5, int(random(15, 36) / depthScale));
-        HealthPotion potion = new HealthPotion(healAmt);
-        this.room[x][y] = potion;
-        this.positions.put(potion, new Position(x, y, this));
+        Berry berry = new Berry(healAmt);
+        this.room[x][y] = berry;
+        this.positions.put(berry, new Position(x, y, this));
       }
     }
 
-    // Randomly place spike traps (more and stronger in deeper rooms)
-    int numTraps = int(random(1, 4)) + this.roomsCleared / 3;
+    // Randomly place poison swamps (more and stronger in deeper floors)
+    int numSwamps = int(random(1, 4)) + this.roomsCleared / 3;
 
-    for (int i = 0; i < numTraps; i++) {
+    for (int i = 0; i < numSwamps; i++) {
       int x = int(random(this.roomWidth));
       int y = int(random(this.roomHeight));
 
       if (this.room[x][y] == null) {
-        int trapDmg = int(random(5, 21) * depthScale);
-        SpikeTrap trap = new SpikeTrap(trapDmg);
-        this.room[x][y] = trap;
-        this.positions.put(trap, new Position(x, y, this));
+        int swampDmg = int(random(5, 21) * depthScale);
+        PoisonSwamp swamp = new PoisonSwamp(swampDmg);
+        this.room[x][y] = swamp;
+        this.positions.put(swamp, new Position(x, y, this));
       }
     }
 
@@ -355,13 +361,15 @@ class Scene {
    */
 
   public boolean tryTurn() {
-    // If the player is dead, reset the room and depth counter
+    // If on the death screen, do nothing until respawn
+    if (this.dead) {
+      return false;
+    }
+
+    // If the player is dead, show the death screen
     if (this.player == null || this.player.getHealth() == 0) {
-      Direction[] directions = Direction.values();
-      Direction direction = directions[int(random(directions.length))];
-      this.player = new Player(direction);
-      this.roomsCleared = 0;
-      this.reset(direction);
+      this.dead = true;
+      return true;
     }
 
     // Get the player's action
@@ -395,13 +403,9 @@ class Scene {
       action = enemy.getAction();
 
       if (this.tryAction(enemy, action) && action.isAttack) {
-        // If the player died, reset the room and save the game
+        // If the player died, show the death screen
         if (player.getHealth() == 0) {
-          Direction[] directions = Direction.values();
-          Direction direction = directions[int(random(directions.length))];
-          this.player = new Player(direction);
-          this.roomsCleared = 0;
-          this.reset(direction);
+          this.dead = true;
           return true;
         }
 
@@ -460,7 +464,7 @@ class Scene {
         Actor target = (Actor) this.room[x][y];
 
         if (target.getHealth() > 0) {
-          target.updateHealth(-actor.getDamage());
+          target.updateHealth(-actor.getDamageAgainst(target));
         } else {
           this.room[x][y] = null;
         }
@@ -574,6 +578,17 @@ class Scene {
    */
 
   public void keyPressed() {
+    if (this.dead) {
+      // Respawn on any key press
+      Direction[] directions = Direction.values();
+      Direction direction = directions[int(random(directions.length))];
+      this.player = new Player(direction);
+      this.roomsCleared = 0;
+      this.dead = false;
+      this.reset(direction);
+      return;
+    }
+
     if (this.player != null) {
       this.player.keyPressed();
     }
@@ -606,26 +621,26 @@ class Scene {
     float offsetX = (width - this.roomWidth * size) / 2;
     float offsetY = (height - this.roomHeight * size) / 2;
 
-    // Draw the room floor tiles with a checkerboard pattern
+    // Draw the room floor tiles with a cave-themed checkerboard
     for (int x = 0; x < this.roomWidth; x++) {
       for (int y = 0; y < this.roomHeight; y++) {
         float tileX = offsetX + x * size;
         float tileY = offsetY + y * size;
 
         if ((x + y) % 2 == 0) {
-          fill(60, 60, 70);
+          fill(35, 30, 55);
         } else {
-          fill(50, 50, 60);
+          fill(28, 24, 48);
         }
 
-        stroke(40, 40, 50);
+        stroke(22, 18, 40);
         strokeWeight(1);
         rect(tileX, tileY, size, size);
       }
     }
 
-    // Draw walls around the room
-    fill(90, 75, 60);
+    // Draw cave walls around the room
+    fill(55, 40, 80);
     noStroke();
     rect(offsetX - size, offsetY - size, (this.roomWidth + 2) * size, size);
     rect(offsetX - size, offsetY + this.roomHeight * size, (this.roomWidth + 2) * size, size);
@@ -686,10 +701,36 @@ class Scene {
       }
     }
 
-    // Draw depth HUD in the top-left corner
+    // Draw floor HUD in the top-left corner
     fill(255);
     textAlign(LEFT, TOP);
     textSize(16);
-    text("Room: " + this.roomsCleared, 10, 10);
+    String[] stageNames = {"", "Ember", "Blaze", "Inferno"};
+    String stageName = stageNames[this.player.getEvolutionStage()];
+    text("Floor: " + this.roomsCleared + "  |  " + stageName + " (Stage " + this.player.getEvolutionStage() + ")", 10, 10);
+
+    // Draw blackout screen overlay
+    if (this.dead) {
+      // Semi-transparent dark overlay
+      fill(0, 0, 0, 200);
+      rectMode(CORNER);
+      rect(0, 0, width, height);
+
+      // "You blacked out!" text
+      fill(251, 146, 60);
+      textAlign(CENTER, CENTER);
+      textSize(52);
+      text("You blacked out!", width / 2, height / 2 - 40);
+
+      // Floor count reached
+      fill(200);
+      textSize(24);
+      text("Reached floor " + this.roomsCleared, width / 2, height / 2 + 30);
+
+      // Continue prompt
+      fill(255);
+      textSize(18);
+      text("Press any key to return to the entrance", width / 2, height / 2 + 80);
+    }
   }
 }

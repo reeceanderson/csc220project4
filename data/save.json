@@ -1,52 +1,78 @@
 {
-  "roomWidth": 10,
+  "roomWidth": 8,
   "doors": [
+    {
+      "x": 7,
+      "y": 5,
+      "direction": "EAST"
+    },
+    {
+      "x": 0,
+      "y": 5,
+      "direction": "WEST"
+    },
     {
       "x": 3,
       "y": 0,
       "direction": "NORTH"
+    }
+  ],
+  "entry": "NORTH",
+  "playerX": 4,
+  "roomHeight": 7,
+  "roomsCleared": 12,
+  "objects": [
+    {
+      "healAmount": 11,
+      "x": 0,
+      "y": 1,
+      "className": "Berry"
     },
     {
       "x": 0,
       "y": 3,
-      "direction": "WEST"
+      "className": "PoisonSwamp",
+      "damageAmount": 43
     },
     {
       "x": 1,
-      "y": 9,
-      "direction": "SOUTH"
-    }
-  ],
-  "entry": "WEST",
-  "playerX": 7,
-  "roomHeight": 10,
-  "roomsCleared": 8,
-  "objects": [
+      "y": 6,
+      "className": "PoisonSwamp",
+      "damageAmount": 33
+    },
     {
-      "healAmount": 7,
-      "x": 0,
-      "y": 4,
-      "className": "HealthPotion"
+      "x": 2,
+      "y": 5,
+      "className": "PoisonSwamp",
+      "damageAmount": 16
+    },
+    {
+      "x": 6,
+      "y": 1,
+      "className": "PoisonSwamp",
+      "damageAmount": 31
     },
     {
       "x": 7,
-      "y": 0,
-      "className": "SpikeTrap",
-      "damageAmount": 28
+      "y": 1,
+      "className": "PoisonSwamp",
+      "damageAmount": 26
     },
     {
-      "x": 9,
-      "y": 8,
-      "className": "SpikeTrap",
-      "damageAmount": 12
+      "x": 7,
+      "y": 6,
+      "className": "PoisonSwamp",
+      "damageAmount": 55
     }
   ],
-  "playerY": 8,
+  "playerY": 6,
   "player": {
-    "damage": 10,
-    "facing": "SOUTH",
-    "maxHealth": 100,
+    "damage": 23,
+    "evolutionStage": 3,
+    "facing": "NORTH",
+    "maxHealth": 225,
+    "creatureType": "FIRE",
     "className": "Player",
-    "currHealth": 0
+    "currHealth": 225
   }
 }

@@ -696,7 +696,7 @@ for (int i = 0; i < numEnemies; i++) {
     fill(255);
     textAlign(LEFT, TOP);
     textSize(16);
-    String[] stageNames = {"", "Ember", "Blaze", "Inferno"};
+    String[] stageNames = {"", "Charmander", "Charmeleon", "Charizard"};
     String stageName = stageNames[this.player.getEvolutionStage()];
     text("Floor: " + this.roomsCleared + "  |  " + stageName + " (Stage " + this.player.getEvolutionStage() + ")", 10, 10);
 
@@ -713,10 +713,11 @@ for (int i = 0; i < numEnemies; i++) {
       textSize(52);
       text("You blacked out!", width / 2, height / 2 - 40);
 
-      // Floor count reached
+      // Floor count and evolution reached
       fill(200);
       textSize(24);
-      text("Reached floor " + this.roomsCleared, width / 2, height / 2 + 30);
+      String[] deathNames = {"", "Charmander", "Charmeleon", "Charizard"};
+      text("Reached floor " + this.roomsCleared + " as " + deathNames[this.player.getEvolutionStage()], width / 2, height / 2 + 30);
 
       // Continue prompt
       fill(255);

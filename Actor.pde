@@ -171,9 +171,11 @@ abstract class Actor extends WorldObject {
    *      Method: public draw()
    *  Parameters: void
    *      Return: void
-   * Description: Draws the actor's health bar, showing
-   *              remaining health in green and lost health
-   *              in red, visible against the background
+   * Description: Draws the actor's health bar in the style
+   *              of classic Pokemon games. Player gets a green
+   *              bar, enemies get a red bar. The background is
+   *              a dark empty track with no colored fill behind
+   *              the remaining health.
    */
 
   public void draw() {
@@ -183,18 +185,23 @@ abstract class Actor extends WorldObject {
     float barX = (size - barWidth) / 2;
     float barY = size * 0.05;
 
-    // Background (lost health - red)
+    // Dark empty track
     noStroke();
-    fill(180, 40, 40);
+    fill(30, 30, 30);
     rect(barX, barY, barWidth, barHeight);
 
-    // Foreground (remaining health - green)
-    fill(34, 197, 94);
+    // Health fill — green for player, red for enemy
+    if (this instanceof Player) {
+      fill(34, 197, 94);
+    } else {
+      fill(239, 68, 68);
+    }
+
     rect(barX, barY, barWidth * this.getHealth(), barHeight);
 
-    // Border
+    // Thin border
     noFill();
-    stroke(255);
+    stroke(80);
     strokeWeight(1);
     rect(barX, barY, barWidth, barHeight);
     noStroke();

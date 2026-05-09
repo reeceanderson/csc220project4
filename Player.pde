@@ -13,11 +13,17 @@ class Player extends Actor {
   private char nextKey;
   private HashMap<Character, Boolean> debounce;
   private int evolutionStage;
+  private PImage[] sprites;
+
+  // Charmander(4) -> Charmeleon(5) -> Charizard(6)
+  private final int[] EVOLUTION_IDS = { 4, 5, 6 };
 
   /**
    * Constructor: public Player()
    *  Parameters: Direction direction - The direction to face
-   * Description: Constructs a player in a new room
+   * Description: Constructs a player in a new room and loads
+   *              Pokemon sprites for all three evolution stages
+   *              from the PokeAPI sprite repository
    */
 
   public Player(Direction direction) {
@@ -25,12 +31,14 @@ class Player extends Actor {
     this.nextKey = '\0';
     this.debounce = new HashMap<Character, Boolean>();
     this.evolutionStage = 1;
+    this.loadAllSprites();
   }
 
   /**
    * Constructor: public Player()
    *  Parameters: JSONObject object - A JSON serialization of the player
-   * Description: Constructs a player from JSON save data
+   * Description: Constructs a player from JSON save data and
+   *              reloads the Pokemon sprites
    */
 
   public Player(JSONObject object) {
@@ -38,6 +46,25 @@ class Player extends Actor {
     this.nextKey = '\0';
     this.debounce = new HashMap<Character, Boolean>();
     this.evolutionStage = object.getInt("evolutionStage", 1);
+    this.loadAllSprites();
+  }
+
+  /**
+   *      Method: private loadAllSprites()
+   *  Parameters: void
+   *      Return: void
+   * Description: Loads Pokemon sprites for all three evolution
+   *              stages from the PokeAPI GitHub sprite repository.
+   *              Requires an active internet connection.
+   */
+
+  private void loadAllSprites() {
+    this.sprites = new PImage[3];
+
+    for (int i = 0; i < 3; i++) {
+      String url = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/" + EVOLUTION_IDS[i] + ".png";
+      this.sprites[i] = loadImage(url);
+    }
   }
 
   /**
@@ -95,11 +122,11 @@ class Player extends Actor {
    *      Method: public draw()
    *  Parameters: void
    *      Return: void
-   * Description: Draws the player creature based on its
-   *              evolution stage. Stage 1 is a small fire
-   *              creature, stage 2 adds horns and is larger,
-   *              stage 3 adds wings and is the largest.
-   *              A flame tail indicates facing direction.
+   * Description: Draws the player using the Pokemon sprite
+   *              for the current evolution stage (Charmander,
+   *              Charmeleon, or Charizard). Falls back to
+   *              hand-drawn shapes if sprites failed to load.
+   *              Always draws the flame direction indicator.
    */
 
   public void draw() {
@@ -108,21 +135,32 @@ class Player extends Actor {
     float cx = size / 2;
     float cy = size / 2;
 
-    switch (this.evolutionStage) {
-    case 1:
-      this.drawStage1(size, cx, cy);
-      break;
+    int idx = this.evolutionStage - 1;
+    PImage currentSprite = (idx >= 0 && idx < this.sprites.length) ? this.sprites[idx] : null;
 
-    case 2:
-      this.drawStage2(size, cx, cy);
-      break;
+    if (currentSprite != null) {
+      // Draw the Pokemon sprite scaled to the tile
+      float padding = size * 0.1;
+      imageMode(CORNER);
+      image(currentSprite, padding, padding, size - padding * 2, size - padding * 2);
+    } else {
+      // Fallback to shape drawing if sprite didn't load
+      switch (this.evolutionStage) {
+      case 1:
+        this.drawStage1(size, cx, cy);
+        break;
 
-    case 3:
-      this.drawStage3(size, cx, cy);
-      break;
+      case 2:
+        this.drawStage2(size, cx, cy);
+        break;
+
+      case 3:
+        this.drawStage3(size, cx, cy);
+        break;
+      }
     }
 
-    // Draw flame tail for facing direction (all stages)
+    // Always draw flame direction indicator on top
     this.drawFlame(size, cx, cy);
   }
 

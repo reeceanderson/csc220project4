@@ -51,10 +51,6 @@ class Enemy extends Actor {
     this.sprite        = loadSprite(this.pokemonId);
   }
 
-  // ===========================================================
-  //  Sprite helpers
-  // ===========================================================
-
   /**
    *      Method: private pickPokemonId()
    *  Parameters: CreatureType type - The enemy's elemental type
@@ -118,10 +114,6 @@ class Enemy extends Actor {
     return img;
   }
 
-  // ===========================================================
-  //  serialize()
-  // ===========================================================
-
   /**
    *      Method: public serialize()
    *  Parameters: void
@@ -136,10 +128,6 @@ class Enemy extends Actor {
     object.setInt("pokemonId", this.pokemonId);
     return object;
   }
-
-  // ===========================================================
-  //  draw()
-  // ===========================================================
 
   /**
    *      Method: public draw()
@@ -237,10 +225,6 @@ class Enemy extends Actor {
     }
   }
 
-  // ===========================================================
-  //  getAction()
-  // ===========================================================
-
   /**
    *      Method: public getAction()
    *  Parameters: void
@@ -288,10 +272,6 @@ class Enemy extends Actor {
     this.stuckCounter++;
     return null;
   }
-
-  // ===========================================================
-  //  Private helpers
-  // ===========================================================
 
   private Action bestAttack() {
     Action facingAttack = attackAction(this.facing);

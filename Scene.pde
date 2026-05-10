@@ -771,6 +771,12 @@ class Scene {
     String stageName = stageNames[this.player.getEvolutionStage()];
     text("Floor: " + this.roomsCleared + "  |  " + stageName + " (Stage " + this.player.getEvolutionStage() + ")", 10, 10);
 
+    // Draw inventory HUD in the top-right corner
+    int berryCount = this.player.getInventorySize();
+    textAlign(RIGHT, TOP);
+    fill(59, 130, 246);
+    text("Berries: " + berryCount + "  [E] to use", width - 10, 10);
+
     // Draw blackout screen overlay
     if (this.dead) {
       // Semi-transparent dark overlay

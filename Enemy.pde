@@ -31,10 +31,10 @@ class Enemy extends Actor {
    */
   public Enemy(int health, int damage, Direction facing, CreatureType type) {
     super(health, damage, facing, type);
-    this.stuckCounter  = 0;
+    this.stuckCounter = 0;
     this.lastAttempted = null;
-    this.pokemonId     = pickPokemonId(type);
-    this.sprite        = loadSprite(this.pokemonId);
+    this.pokemonId = pickPokemonId(type);
+    this.sprite = loadSprite(this.pokemonId);
   }
 
   /**
@@ -47,8 +47,8 @@ class Enemy extends Actor {
     super(object);
     this.stuckCounter  = 0;
     this.lastAttempted = null;
-    this.pokemonId     = object.getInt("pokemonId", int(random(1, 152)));
-    this.sprite        = loadSprite(this.pokemonId);
+    this.pokemonId = object.getInt("pokemonId", int(random(1, 152)));
+    this.sprite = loadSprite(this.pokemonId);
   }
 
   /**
@@ -79,9 +79,9 @@ class Enemy extends Actor {
    *                NORMAL - anything 1–151
    */
   private int pickPokemonId(CreatureType type) {
-    int[] firePool   = { 4, 5, 6, 37, 38, 58, 59, 77, 78, 126, 136, 146 };
-    int[] waterPool  = { 7, 8, 9, 54, 55, 60, 72, 79, 86, 90, 116, 118, 130, 131, 134, 138, 140 };
-    int[] grassPool  = { 1, 2, 3, 43, 44, 45, 69, 70, 71, 102, 114 };
+    int[] firePool = { 4, 5, 6, 37, 38, 58, 59, 77, 78, 126, 136, 146 };
+    int[] waterPool = { 7, 8, 9, 54, 55, 60, 72, 79, 86, 90, 116, 118, 130, 131, 134, 138, 140 };
+    int[] grassPool = { 1, 2, 3, 43, 44, 45, 69, 70, 71, 102, 114 };
 
     switch (type) {
     case FIRE:
@@ -144,9 +144,9 @@ class Enemy extends Actor {
     super.draw();
 
     float size = min((float) width / 12, (float) height / 12);
-    float cx   = size / 2;
-    float cy   = size / 2;
-    float r    = size * 0.30;
+    float cx = size / 2;
+    float cy = size / 2;
+    float r  = size * 0.30;
 
     if (this.sprite != null) {
       // Draw the Pokemon sprite scaled to fill the tile,
@@ -154,7 +154,8 @@ class Enemy extends Actor {
       float padding = size * 0.12;
       imageMode(CORNER);
       image(this.sprite, padding, padding, size - padding * 2, size - padding * 2);
-    } else {
+    } 
+    else {
       // Fallback placeholder when sprite hasn't loaded
       int[] primary = this.getCreatureType().getColor();
       int[] accent  = this.getCreatureType().getAccent();

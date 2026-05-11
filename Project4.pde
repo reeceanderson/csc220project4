@@ -39,7 +39,7 @@ void setup() {
     saveJSONObject(data, fileName);
   }
 
-  bgMusic = new SoundFile(this, "Pokemon Dungeon Crawler (Nate_Koenig).mp3");
+  bgMusic = new SoundFile(this, "Pokemon Dungeon Crawler (Nate Koenig).mp3");
   if (bgMusic != null) {
     bgMusic.loop();
   }

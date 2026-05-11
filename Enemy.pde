@@ -93,7 +93,7 @@ class Enemy extends Actor {
     case GRASS:
       return grassPool[int(random(grassPool.length))];
 
-    default: // NORMAL - any Gen 1 Pokemon
+    default: 
       return int(random(1, 152));
     }
   }
@@ -149,13 +149,10 @@ class Enemy extends Actor {
     float r = size * 0.30;
 
     if (this.sprite != null) {
-      // Draw the Pokemon sprite scaled to fill the tile,
-      // with a small padding so it doesn't clip the health bar
       float padding = size * 0.12;
       imageMode(CORNER);
       image(this.sprite, padding, padding, size - padding * 2, size - padding * 2);
     } else {
-      // Fallback placeholder when sprite hasn't loaded
       int[] primary = this.getCreatureType().getColor();
       int[] accent = this.getCreatureType().getAccent();
 
@@ -177,7 +174,6 @@ class Enemy extends Actor {
       ellipse(cx + eyeOff, eyeY, r * 0.20, r * 0.24);
     }
 
-    // Always draw the facing arrow on top of the sprite
     this.drawDirectionArrow(cx, cy, r);
   }
 
@@ -226,7 +222,6 @@ class Enemy extends Actor {
    *                 blocked turns to escape dead-ends.
    */
   public Action getAction() {
-    // 1. Attack if possible
     Action attack = this.bestAttack();
     if (attack != null) {
       this.facing = attack.direction;
@@ -235,16 +230,13 @@ class Enemy extends Actor {
       return attack;
     }
 
-    // 2. Build preferred move order
     Direction[] preferred = this.buildMoveOrder();
 
-    // 3. Escape dead-ends by shuffling after 2 stuck turns
     if (this.stuckCounter >= 2) {
       preferred = shuffled(preferred);
       this.stuckCounter = 0;
     }
 
-    // 4. Pick the first valid move
     for (Direction dir : preferred) {
       Action move = moveAction(dir);
       if (move != null && this.getActionValidity(move)) {
@@ -259,7 +251,6 @@ class Enemy extends Actor {
       }
     }
 
-    // 5. Totally blocked - do nothing
     this.stuckCounter++;
     return null;
   }
@@ -289,7 +280,7 @@ class Enemy extends Actor {
 
     Direction primary, secondary, tertiary, quaternary;
 
-    if ((!swapAxes && verticalOpen) || (swapAxes && !horizontalOpen)) {
+    if ((!swapAxes && verticalOpen) || (swapAxes && !horizontalOpen)) { //don't think we went over the ternary operator in class but I learned it in 136 and 242. 
       primary = canN ? Direction.NORTH : Direction.SOUTH;
       secondary = canS ? Direction.SOUTH : Direction.NORTH;
       tertiary = canE ? Direction.EAST : Direction.WEST;

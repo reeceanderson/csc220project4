@@ -9,8 +9,11 @@
  * Description: A dungeon crawler game
  */
 
+import processing.sound.*;
+
 Scene scene;
 String fileName;
+SoundFile bgMusic;
 
 /**
  *      Method: setup()
@@ -34,6 +37,11 @@ void setup() {
     JSONObject data = scene.serialize();
     file.getParentFile().mkdirs();
     saveJSONObject(data, fileName);
+  }
+
+  bgMusic = new SoundFile(this, "Pokemon Dungeon Crawler (Nate_Koenig).mp3");
+  if (bgMusic != null) {
+    bgMusic.loop();
   }
 }
 

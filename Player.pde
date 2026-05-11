@@ -14,6 +14,7 @@ class Player extends Actor {
   private HashMap<Character, Boolean> debounce;
   private int evolutionStage;
   private PImage[] sprites;
+  private ArrayList<Integer> inventory;
 
   // Charmander(4) -> Charmeleon(5) -> Charizard(6)
   private final int[] EVOLUTION_IDS = { 4, 5, 6 };
@@ -31,6 +32,7 @@ class Player extends Actor {
     this.nextKey = '\0';
     this.debounce = new HashMap<Character, Boolean>();
     this.evolutionStage = 1;
+    this.inventory = new ArrayList<Integer>();
     this.loadAllSprites();
   }
 
@@ -46,6 +48,17 @@ class Player extends Actor {
     this.nextKey = '\0';
     this.debounce = new HashMap<Character, Boolean>();
     this.evolutionStage = object.getInt("evolutionStage", 1);
+    this.inventory = new ArrayList<Integer>();
+
+    // Load inventory from save
+    JSONArray inv = object.getJSONArray("inventory");
+
+    if (inv != null) {
+      for (int i = 0; i < inv.size(); i++) {
+        this.inventory.add(inv.getInt(i));
+      }
+    }
+
     this.loadAllSprites();
   }
 
@@ -78,6 +91,15 @@ class Player extends Actor {
     JSONObject object = super.serialize();
     object.setString("className", "Player");
     object.setInt("evolutionStage", this.evolutionStage);
+
+    // Save inventory
+    JSONArray inv = new JSONArray();
+
+    for (int i = 0; i < this.inventory.size(); i++) {
+      inv.setInt(i, this.inventory.get(i));
+    }
+
+    object.setJSONArray("inventory", inv);
     return object;
   }
 
@@ -116,6 +138,60 @@ class Player extends Actor {
     }
 
     return false;
+  }
+
+  /**
+   *      Method: public addBerry()
+   *  Parameters: int healAmount - The heal value of the berry
+   *      Return: void
+   * Description: Adds a berry to the player's inventory,
+   *              sorted so the weakest berry is used first
+   */
+
+  public void addBerry(int healAmount) {
+    this.inventory.add(healAmount);
+    java.util.Collections.sort(this.inventory);
+  }
+
+  /**
+   *      Method: public useBerry()
+   *  Parameters: void
+   *      Return: boolean - Whether a berry was used
+   * Description: Uses the weakest berry in the inventory
+   *              to heal the player. Returns false if the
+   *              inventory is empty or health is already full.
+   */
+
+  public boolean useBerry() {
+    if (this.inventory.isEmpty() || this.getHealth() >= 1.0) {
+      return false;
+    }
+
+    int healAmount = this.inventory.remove(0);
+    this.updateHealth(healAmount);
+    return true;
+  }
+
+  /**
+   *      Method: public getInventorySize()
+   *  Parameters: void
+   *      Return: int - The number of berries in the inventory
+   * Description: Returns how many berries the player is carrying
+   */
+
+  public int getInventorySize() {
+    return this.inventory.size();
+  }
+
+  /**
+   *      Method: public getInventory()
+   *  Parameters: void
+   *      Return: ArrayList<Integer> - The list of berry heal amounts
+   * Description: Returns the player's berry inventory
+   */
+
+  public ArrayList<Integer> getInventory() {
+    return this.inventory;
   }
 
   /**
@@ -416,9 +492,15 @@ class Player extends Actor {
     // Convert to uppercase
     char pressed = Character.toUpperCase(key);
 
-    if ("WASD ".indexOf(pressed) != -1 && !debounce.getOrDefault(pressed, false)) {
+    if ("WASDE ".indexOf(pressed) != -1 && !debounce.getOrDefault(pressed, false)) {
       debounce.put(pressed, true);
-      nextKey = pressed;
+
+      // E key uses a berry immediately without consuming a turn
+      if (pressed == 'E') {
+        this.useBerry();
+      } else {
+        nextKey = pressed;
+      }
     }
   }
 

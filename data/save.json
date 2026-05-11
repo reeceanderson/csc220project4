@@ -1,84 +1,72 @@
 {
-  "roomWidth": 8,
+  "roomWidth": 7,
   "doors": [
-    {
-      "x": 5,
-      "y": 7,
-      "direction": "SOUTH"
-    },
     {
       "x": 0,
       "y": 1,
       "direction": "WEST"
     },
     {
-      "x": 7,
-      "y": 2,
+      "x": 1,
+      "y": 0,
+      "direction": "NORTH"
+    },
+    {
+      "x": 6,
+      "y": 3,
       "direction": "EAST"
     }
   ],
-  "entry": "SOUTH",
+  "entry": "NORTH",
   "playerX": 4,
-  "roomHeight": 8,
-  "roomsCleared": 1,
+  "roomHeight": 9,
+  "roomsCleared": 4,
   "objects": [
     {
-      "damage": 8,
-      "pokemonId": 134,
-      "x": 0,
-      "facing": "NORTH",
+      "x": 1,
       "y": 2,
-      "maxHealth": 50,
-      "creatureType": "NORMAL",
-      "className": "Enemy",
-      "currHealth": 50
+      "className": "PoisonSwamp",
+      "damageAmount": 9
     },
     {
-      "damage": 8,
-      "pokemonId": 38,
+      "damage": 11,
+      "pokemonId": 131,
       "x": 3,
       "facing": "EAST",
       "y": 1,
-      "maxHealth": 50,
-      "creatureType": "FIRE",
+      "maxHealth": 72,
+      "creatureType": "WATER",
       "className": "Enemy",
-      "currHealth": 50
+      "currHealth": 52
     },
     {
-      "healAmount": 16,
-      "x": 3,
-      "y": 6,
-      "className": "Berry"
-    },
-    {
-      "x": 4,
-      "y": 2,
-      "className": "PoisonSwamp",
-      "damageAmount": 18
-    },
-    {
-      "x": 4,
-      "y": 6,
-      "className": "PoisonSwamp",
-      "damageAmount": 7
-    },
-    {
-      "healAmount": 21,
       "x": 5,
-      "y": 1,
-      "className": "Berry"
+      "y": 0,
+      "className": "PoisonSwamp",
+      "damageAmount": 20
     },
     {
-      "healAmount": 33,
-      "x": 7,
+      "damage": 11,
+      "pokemonId": 83,
+      "x": 5,
+      "facing": "WEST",
+      "y": 1,
+      "maxHealth": 72,
+      "creatureType": "NORMAL",
+      "className": "Enemy",
+      "currHealth": 72
+    },
+    {
+      "healAmount": 19,
+      "x": 6,
       "y": 0,
       "className": "Berry"
     },
     {
-      "x": 7,
-      "y": 4,
+      "x": 6,
+      "y": 1,
       "className": "PoisonSwamp",
-      "damageAmount": 20
+      "damageAmount": 7
     }
   ],
   "playerY": 1,
@@ -89,6 +77,17 @@
     "maxHealth": 100,
     "creatureType": "FIRE",
     "className": "Player",
-    "currHealth": 92
+    "inventory": [
+      28,
+      30,
+      35,
+      35,
+      36,
+      36,
+      37,
+      37,
+      40
+    ],
+    "currHealth": 100
   }
 }

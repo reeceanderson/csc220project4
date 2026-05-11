@@ -85,12 +85,12 @@ class Berry extends Interactable {
    *      Method: public interact()
    *  Parameters: Player player - The player interacting with the berry
    *      Return: boolean - Whether or not the interaction succeeded
-   * Description: Heals the player by the berry's heal amount
-   *              and removes the berry from the room
+   * Description: Adds the berry to the player's inventory
+   *              for later use instead of healing immediately
    */
 
   public boolean interact(Player player) {
-    player.updateHealth(this.healAmount);
+    player.addBerry(this.healAmount);
     return true;
   }
 

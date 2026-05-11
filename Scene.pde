@@ -266,30 +266,54 @@ class Scene {
       }
     }
 
-    // Randomly place berries (fewer and weaker in deeper floors)
-    int numBerries = max(1, int(random(1, 4)) - this.roomsCleared / 5);
+    // --- BERRY SPAWNING ---
+    // Generous early (3-4 strong berries), scarce late (1 weak berry)
+    int numBerries;
+    int minHeal, maxHeal;
+
+    if (this.roomsCleared <= 3) {
+      numBerries = int(random(3, 5));
+      minHeal = 25;
+      maxHeal = 40;
+    } else if (this.roomsCleared <= 7) {
+      numBerries = int(random(2, 4));
+      minHeal = max(10, int(20 / depthScale));
+      maxHeal = max(15, int(30 / depthScale));
+    } else {
+      numBerries = int(random(1, 3));
+      minHeal = max(5, int(15 / depthScale));
+      maxHeal = max(8, int(20 / depthScale));
+    }
 
     for (int i = 0; i < numBerries; i++) {
       int x = int(random(this.roomWidth));
       int y = int(random(this.roomHeight));
 
       if (this.room[x][y] == null) {
-        int healAmt = max(5, int(random(15, 36) / depthScale));
-        Berry berry = new Berry(healAmt);
+        Berry berry = new Berry(int(random(minHeal, maxHeal + 1)));
         this.room[x][y] = berry;
         this.positions.put(berry, new Position(x, y, this));
       }
     }
 
-    // Randomly place poison swamps (more and stronger in deeper floors)
-    int numSwamps = int(random(1, 4)) + this.roomsCleared / 3;
+    // --- SWAMP SPAWNING ---
+    // None on floor 1, ramps up after that
+    int numSwamps = 0;
+
+    if (this.roomsCleared == 1) {
+      numSwamps = 0;
+    } else if (this.roomsCleared <= 3) {
+      numSwamps = int(random(0, 2));
+    } else {
+      numSwamps = int(random(1, 3)) + this.roomsCleared / 4;
+    }
 
     for (int i = 0; i < numSwamps; i++) {
       int x = int(random(this.roomWidth));
       int y = int(random(this.roomHeight));
 
       if (this.room[x][y] == null) {
-        int swampDmg = int(random(5, 21) * depthScale);
+        int swampDmg = int(random(5, 16) * depthScale);
         PoisonSwamp swamp = new PoisonSwamp(swampDmg);
         this.room[x][y] = swamp;
         this.positions.put(swamp, new Position(x, y, this));
@@ -308,22 +332,69 @@ class Scene {
     //   }
     // }
 
-    
-   int numEnemies = int(random(2, 5)) + this.roomsCleared / 3;
-for (int i = 0; i < numEnemies; i++) {
-  int x = int(random(this.roomWidth));
-  int y = int(random(this.roomHeight));
-  if (this.room[x][y] == null) {
-    Direction dir = Direction.values()[int(random(4))];
-    CreatureType type = CreatureType.values()[int(random(CreatureType.values().length))];
-    int enemyHealth = int(50 * depthScale);
-    int enemyDamage = int(8 * depthScale);
-    Enemy enemy = new Enemy(enemyHealth, enemyDamage, dir, type);
-    this.room[x][y] = enemy;
-    this.enemies.add(enemy);
-    this.positions.put(enemy, new Position(x, y, this));
-  }
-}
+    // --- ENEMY SPAWNING ---
+    // Floor 1: 1 weak normal-type enemy to learn controls
+    // Floor 2-3: 1-2 enemies, grass-biased (easy for fire player)
+    // Floor 4-6: 2-3 enemies, mixed types
+    // Floor 7+: 3+ enemies, all types, stats scale hard
+    int numEnemies;
+    int baseHealth, baseDamage;
+
+    if (this.roomsCleared <= 1) {
+      numEnemies = 1;
+      baseHealth = 30;
+      baseDamage = 5;
+    } else if (this.roomsCleared <= 3) {
+      numEnemies = int(random(1, 3));
+      baseHealth = 40;
+      baseDamage = 6;
+    } else if (this.roomsCleared <= 6) {
+      numEnemies = int(random(2, 4));
+      baseHealth = 50;
+      baseDamage = 8;
+    } else {
+      numEnemies = int(random(3, 5)) + (this.roomsCleared - 7) / 2;
+      baseHealth = 50;
+      baseDamage = 8;
+    }
+
+    for (int i = 0; i < numEnemies; i++) {
+      int x = int(random(this.roomWidth));
+      int y = int(random(this.roomHeight));
+
+      if (this.room[x][y] == null) {
+        Direction dir = Direction.values()[int(random(4))];
+
+        // Pick enemy type based on floor difficulty
+        CreatureType type;
+
+        if (this.roomsCleared <= 1) {
+          // Floor 1: only normal types (no type advantage against player)
+          type = CreatureType.NORMAL;
+        } else if (this.roomsCleared <= 3) {
+          // Floor 2-3: mostly grass (weak to fire player) with some normal
+          float roll = random(1);
+          type = (roll < 0.6) ? CreatureType.GRASS : CreatureType.NORMAL;
+        } else if (this.roomsCleared <= 6) {
+          // Floor 4-6: mix of all types, water still rare
+          float roll = random(1);
+          if (roll < 0.35) type = CreatureType.GRASS;
+          else if (roll < 0.6) type = CreatureType.NORMAL;
+          else if (roll < 0.8) type = CreatureType.FIRE;
+          else type = CreatureType.WATER;
+        } else {
+          // Floor 7+: fully random, water becomes common
+          type = CreatureType.values()[int(random(CreatureType.values().length))];
+        }
+
+        int enemyHealth = int(baseHealth * depthScale);
+        int enemyDamage = int(baseDamage * depthScale);
+        Enemy enemy = new Enemy(enemyHealth, enemyDamage, dir, type);
+        this.room[x][y] = enemy;
+        this.enemies.add(enemy);
+        this.positions.put(enemy, new Position(x, y, this));
+      }
+    }
 
     this.updateActions(this.player);
   }
@@ -699,6 +770,12 @@ for (int i = 0; i < numEnemies; i++) {
     String[] stageNames = {"", "Charmander", "Charmeleon", "Charizard"};
     String stageName = stageNames[this.player.getEvolutionStage()];
     text("Floor: " + this.roomsCleared + "  |  " + stageName + " (Stage " + this.player.getEvolutionStage() + ")", 10, 10);
+
+    // Draw inventory HUD in the top-right corner
+    int berryCount = this.player.getInventorySize();
+    textAlign(RIGHT, TOP);
+    fill(59, 130, 246);
+    text("Berries: " + berryCount + "  [E] to use", width - 10, 10);
 
     // Draw blackout screen overlay
     if (this.dead) {

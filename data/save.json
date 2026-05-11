@@ -1,71 +1,134 @@
 {
-  "roomWidth": 9,
+  "roomWidth": 7,
   "doors": [
     {
-      "x": 4,
+      "x": 1,
       "y": 0,
       "direction": "NORTH"
     },
     {
-      "x": 8,
-      "y": 3,
-      "direction": "EAST"
-    },
-    {
-      "x": 7,
-      "y": 7,
+      "x": 3,
+      "y": 8,
       "direction": "SOUTH"
-    }
-  ],
-  "entry": "EAST",
-  "playerX": 7,
-  "roomHeight": 8,
-  "roomsCleared": 7,
-  "objects": [
+    },
     {
       "x": 0,
-      "y": 7,
-      "className": "PoisonSwamp",
-      "damageAmount": 24
-    },
-    {
-      "x": 5,
       "y": 6,
-      "className": "PoisonSwamp",
-      "damageAmount": 20
-    },
-    {
-      "damage": 15,
-      "pokemonId": 77,
-      "x": 6,
-      "facing": "EAST",
-      "y": 1,
-      "maxHealth": 95,
-      "creatureType": "FIRE",
-      "className": "Enemy",
-      "currHealth": 95
-    },
-    {
-      "damage": 15,
-      "pokemonId": 98,
-      "x": 7,
-      "facing": "SOUTH",
-      "y": 0,
-      "maxHealth": 95,
-      "creatureType": "NORMAL",
-      "className": "Enemy",
-      "currHealth": 20
+      "direction": "WEST"
     }
   ],
-  "playerY": 1,
+  "entry": "WEST",
+  "playerX": 6,
+  "roomHeight": 9,
+  "roomsCleared": 4,
+  "objects": [
+    {
+      "damage": 11,
+      "pokemonId": 86,
+      "x": 0,
+      "facing": "SOUTH",
+      "y": 1,
+      "maxHealth": 72,
+      "creatureType": "NORMAL",
+      "className": "Enemy",
+      "currHealth": 72
+    },
+    {
+      "healAmount": 16,
+      "x": 0,
+      "y": 7,
+      "className": "Berry"
+    },
+    {
+      "x": 0,
+      "y": 8,
+      "className": "PoisonSwamp",
+      "damageAmount": 8
+    },
+    {
+      "x": 1,
+      "y": 1,
+      "className": "PoisonSwamp",
+      "damageAmount": 22
+    },
+    {
+      "damage": 11,
+      "pokemonId": 60,
+      "x": 1,
+      "facing": "NORTH",
+      "y": 7,
+      "maxHealth": 72,
+      "creatureType": "WATER",
+      "className": "Enemy",
+      "currHealth": 72
+    },
+    {
+      "variant": 10,
+      "x": 2,
+      "y": 1,
+      "className": "Stalagmite"
+    },
+    {
+      "variant": 91,
+      "x": 2,
+      "y": 5,
+      "className": "Rock"
+    },
+    {
+      "variant": 43,
+      "x": 3,
+      "y": 2,
+      "className": "Stalagmite"
+    },
+    {
+      "healAmount": 15,
+      "x": 3,
+      "y": 3,
+      "className": "Berry"
+    },
+    {
+      "variant": 91,
+      "x": 4,
+      "y": 3,
+      "className": "Rock"
+    },
+    {
+      "healAmount": 17,
+      "x": 4,
+      "y": 5,
+      "className": "Berry"
+    },
+    {
+      "variant": 71,
+      "x": 5,
+      "y": 1,
+      "className": "Rock"
+    },
+    {
+      "variant": 76,
+      "x": 5,
+      "y": 6,
+      "className": "Stalagmite"
+    }
+  ],
+  "playerY": 4,
   "player": {
-    "damage": 15,
-    "evolutionStage": 2,
-    "facing": "NORTH",
-    "maxHealth": 150,
+    "damage": 10,
+    "evolutionStage": 1,
+    "facing": "WEST",
+    "maxHealth": 100,
     "creatureType": "FIRE",
     "className": "Player",
-    "inventory": [],
-    "currHealth": 0
+    "inventory": [
+      25,
+      26,
+      30,
+      32,
+      33,
+      34,
+      37,
+      38
+    ],
+    "currHealth": 64
   }
 }

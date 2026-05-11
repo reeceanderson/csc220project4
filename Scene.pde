@@ -11,9 +11,6 @@
  *              including the player and enemies
  */
 
-import java.util.LinkedList;
-import java.util.Map;
-
 class Scene {
   private int roomWidth;
   private int roomHeight;
@@ -96,6 +93,12 @@ class Scene {
   worldObj = new PoisonSwamp(obj);
 } else if (className.equals("Enemy")) {
   worldObj = new Enemy(obj);
+} else if (className.equals("Rock")) {
+  worldObj = new Rock(obj);
+} else if (className.equals("Crystal")) {
+  worldObj = new Crystal(obj);
+} else if (className.equals("Stalagmite")) {
+  worldObj = new Stalagmite(obj);
 }
 
       if (worldObj != null) {
@@ -320,17 +323,62 @@ class Scene {
       }
     }
 
-    // TODO: Randomly place obstacles
-    // int numObstacles = int(random(3, 7));
-    // for (int i = 0; i < numObstacles; i++) {
-    //   int x = int(random(this.roomWidth));
-    //   int y = int(random(this.roomHeight));
-    //   if (this.room[x][y] == null) {
-    //     YourObstacle obs = new YourObstacle();
-    //     this.room[x][y] = obs;
-    //     this.positions.put(obs, new Position(x, y, this));
-    //   }
-    // }
+    // --- OBSTACLE SPAWNING ---
+    // Scatter rocks, crystals, and stalagmites naturally
+    // to create varied dungeon terrain without strict maze corridors
+    if (this.roomsCleared >= 2) {
+      int numObstacles;
+
+      if (this.roomsCleared <= 3) {
+        numObstacles = int(random(3, 6));
+      } else if (this.roomsCleared <= 6) {
+        numObstacles = int(random(5, 10));
+      } else {
+        numObstacles = int(random(8, 14));
+      }
+
+      for (int i = 0; i < numObstacles; i++) {
+        int x = int(random(1, this.roomWidth - 1));
+        int y = int(random(1, this.roomHeight - 1));
+
+        if (this.room[x][y] != null) continue;
+
+        // Pick a random obstacle type
+        WorldObject obstacle;
+        float roll = random(1);
+
+        if (roll < 0.4) {
+          obstacle = new Rock(int(random(100)));
+        } else if (roll < 0.7) {
+          obstacle = new Crystal(int(random(100)));
+        } else {
+          obstacle = new Stalagmite(int(random(100)));
+        }
+
+        this.room[x][y] = obstacle;
+        this.positions.put(obstacle, new Position(x, y, this));
+      }
+
+      // Validate connectivity — flood fill from player
+      // and remove obstacles that block paths to doors
+      boolean changed = true;
+
+      while (changed) {
+        changed = false;
+        boolean[][] visited = new boolean[this.roomWidth][this.roomHeight];
+        this.floodFill(visited, playerX, playerY);
+
+        for (Map.Entry<Direction, Position> doorEntry : this.doors.entrySet()) {
+          Position doorPos = doorEntry.getValue();
+          int dx = doorPos.getX();
+          int dy = doorPos.getY();
+
+          if (!visited[dx][dy]) {
+            changed = this.removeBlockingObstacle(visited, dx, dy);
+          }
+        }
+      }
+    }
 
     // --- ENEMY SPAWNING ---
     // Floor 1: 1 weak normal-type enemy to learn controls
@@ -411,6 +459,91 @@ class Scene {
     for (Action action : Action.values()) {
       actor.setActionValidity(action, this.isActionValid(actor, action));
     }
+  }
+
+  /**
+   *      Method: private floodFill()
+   *  Parameters: boolean[][] visited - Grid tracking visited cells
+   *              int         x       - Starting X coordinate
+   *              int         y       - Starting Y coordinate
+   *      Return: void
+   * Description: Recursively marks all reachable cells from
+   *              the given starting position, treating obstacles
+   *              and out-of-bounds tiles as impassable
+   */
+
+  private void floodFill(boolean[][] visited, int x, int y) {
+    if (x < 0 || x >= this.roomWidth || y < 0 || y >= this.roomHeight) return;
+    if (visited[x][y]) return;
+    if (this.isObstacle(x, y)) return;
+
+    visited[x][y] = true;
+    this.floodFill(visited, x + 1, y);
+    this.floodFill(visited, x - 1, y);
+    this.floodFill(visited, x, y + 1);
+    this.floodFill(visited, x, y - 1);
+  }
+
+  /**
+   *      Method: private isObstacle()
+   *  Parameters: int x - The X coordinate to check
+   *              int y - The Y coordinate to check
+   *      Return: boolean - Whether the cell contains an obstacle
+   * Description: Returns true if the cell at (x, y) contains
+   *              a Rock, Crystal, or Stalagmite
+   */
+
+  private boolean isObstacle(int x, int y) {
+    WorldObject obj = this.room[x][y];
+    return obj instanceof Rock || obj instanceof Crystal || obj instanceof Stalagmite;
+  }
+
+  /**
+   *      Method: private removeBlockingObstacle()
+   *  Parameters: boolean[][] visited - Grid of reachable cells
+   *              int         targetX - X coordinate to reach
+   *              int         targetY - Y coordinate to reach
+   *      Return: boolean - Whether an obstacle was removed
+   * Description: Finds and removes the nearest obstacle that
+   *              borders the reachable area to open a path
+   *              toward the target position
+   */
+
+  private boolean removeBlockingObstacle(boolean[][] visited, int targetX, int targetY) {
+    float bestDist = Float.MAX_VALUE;
+    int bestX = -1;
+    int bestY = -1;
+
+    for (int x = 0; x < this.roomWidth; x++) {
+      for (int y = 0; y < this.roomHeight; y++) {
+        if (!this.isObstacle(x, y)) continue;
+
+        boolean adjacent = false;
+
+        if (x > 0 && visited[x - 1][y]) adjacent = true;
+        if (x < this.roomWidth - 1 && visited[x + 1][y]) adjacent = true;
+        if (y > 0 && visited[x][y - 1]) adjacent = true;
+        if (y < this.roomHeight - 1 && visited[x][y + 1]) adjacent = true;
+
+        if (adjacent) {
+          float dist = dist(x, y, targetX, targetY);
+
+          if (dist < bestDist) {
+            bestDist = dist;
+            bestX = x;
+            bestY = y;
+          }
+        }
+      }
+    }
+
+    if (bestX >= 0) {
+      this.positions.remove(this.room[bestX][bestY]);
+      this.room[bestX][bestY] = null;
+      return true;
+    }
+
+    return false;
   }
 
   /**

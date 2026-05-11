@@ -10,6 +10,8 @@
  */
 
 import processing.sound.*;
+import java.util.LinkedList;
+import java.util.Map;
 
 Scene scene;
 String fileName;
